@@ -24,7 +24,7 @@
   adc PlayerVYH,x
   sta PlayerPYH,x  
 
-  cmp #-12
+  cmp #<-12
   bcc :+
   ; revive player
   dec PlayerLives,x
@@ -546,7 +546,7 @@ StartJump:
       lda #SOUND_JUMP
       jsr start_sound
 
-      lda #-4
+      lda #<-4
       sta PlayerVYH,x
       lda #0
       sta PlayerVYL,x
@@ -569,7 +569,7 @@ SkipPlatformCheck:
     lda #METATILE_SPRING
     jsr AddDelayMetaEdit
 
-    lda #-5
+    lda #<-5
     sta PlayerVYH,x
     lda #80
     sta PlayerVYL,x
@@ -633,9 +633,9 @@ NotScrollMode:
 : jsr DispPlayer
   rts
 BlockXSpeed:
-  .byt 3, -3
+  .byt 3, <-3
 BlockXOffset:
-  .byt 12, -12-16
+  .byt 12, <(-12-16)
 
 ShootBillBlock:
   stx TempVal
@@ -845,10 +845,10 @@ ShotHit:
   rts
 .endproc
 .proc OffsetHeldX
-  .byt 8, -8
+  .byt 8, <-8
 .endproc
 .proc BulletSpeed
-  .byt 6, -6
+  .byt 6, <-6
 .endproc
 
 .proc IsPlayerTouching

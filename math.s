@@ -236,55 +236,7 @@ SineTable:
   .byt   0, 12, 24, 36, 45, 53, 59, 63
 CosineTable:
   .byt  64, 63, 59, 53, 45, 36, 24, 12
-  .byt   0,-12,-24,-36,-45,-53,-59,-63
-  .byt -64,-63,-59,-53,-45,-36,-24,-12
+  .byt   0,<-12,<-24,<-36,<-45,<-53,<-59,<-63
+  .byt <-64,<-63,<-59,<-53,<-45,<-36,<-24,<-12
   .byt   0, 12, 24, 36, 45, 53, 59, 63
 
-.macro neg16 val
-  sec             ;Ensure carry is set
-  lda #0          ;Load constant zero
-  sbc val+0       ;... subtract the least significant byte
-  sta val+0       ;... and store the result
-  lda #0          ;Load constant zero again
-  sbc val+1       ;... subtract the most significant byte
-  sta val+1       ;... and store the result
-.endmacro
-
-; added stuff
-.proc SpeedAngle2Offset ; A = speed, Y = angle -> 0,1(X) 2,3(Y)
-Angle = 4
-Speed = 5
-  sty Angle
-  sta Speed
-
-  lda CosineTable,y
-  php
-  bpl :+
-  eor #255
-  add #1
-: ldy Speed
-  jsr mul8
-  sty 0
-  sta 1
-
-  plp
-  bpl :+
-  neg16 0
-:
-
-  ldy Angle
-  lda SineTable,y
-  php
-  bpl :+
-  eor #255
-  add #1
-: ldy Speed
-  jsr mul8
-  sty 2
-  sta 3
-  plp
-  bpl :+
-  neg16 2
-:
-  rts
-.endproc

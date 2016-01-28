@@ -1,3 +1,21 @@
+; Double Action Blaster Guys
+;
+; Copyright (C) 2012-2014 NovaSquirrel
+;
+; This program is free software: you can redistribute it and/or
+; modify it under the terms of the GNU General Public License as
+; published by the Free Software Foundation; either version 3 of the
+; License, or (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful, but
+; WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+; General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;
+
 .enum
 METATILE_EMPTY
 METATILE_SPIKES
@@ -268,7 +286,7 @@ JustFinishLevel:
     cmp #15
     beq NoGood
     txa
-    axs #-32
+    axs #<-32
     lda LevelBuf+0,x
     bne NoGood
     lda LevelBuf+1,x
@@ -537,7 +555,7 @@ MoreObj:
 .proc ChangeBlock ; A-New block, Y-Block index
   sty 1
   stx 2
-  cmp #-1 ; if -1, remove the block visually but leave it in LevelBuf and set a bit in CollectMap
+  cmp #<-1 ; if -1, remove the block visually but leave it in LevelBuf and set a bit in CollectMap
   bne :+
     jsr IndexToBitmap ; first set bit in CollectMap
     ora CollectMap,y

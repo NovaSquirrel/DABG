@@ -1,3 +1,21 @@
+; Double Action Blaster Guys
+;
+; Copyright (C) 2012-2014 NovaSquirrel
+;
+; This program is free software: you can redistribute it and/or
+; modify it under the terms of the GNU General Public License as
+; published by the Free Software Foundation; either version 3 of the
+; License, or (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful, but
+; WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+; General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;
+
 .proc RunObjects
   ldx #0
 Loop:
@@ -74,7 +92,7 @@ Exit:
   lda 0
   cmp #GUN_VERTICAL
   bne :+
-    lda #-4
+    lda #<-4
     sta BulletVY,y
     lda ObjectPYH,x
     bmi :+
@@ -85,7 +103,7 @@ Exit:
   lda 0
   cmp #GUN_DIAGONAL
   bne :+
-    lda #-4
+    lda #<-4
     sta BulletVY,y
     lda retraces
     and #%1000000
@@ -111,7 +129,7 @@ Exit:
   sta BulletType
   sty WhichPlayer
   
-  cpy #-1 ; pick either player
+  cpy #<-1 ; pick either player
   bne :+
     lda retraces
     and #1
@@ -180,19 +198,19 @@ Exit:
 .endproc
 
 .proc BulletXSpeedTable
-  .byt 0, -0
-  .byt 2, -2
-  .byt 3, -3 ; faster
-  .byt 2, -2 ; energy thing
+  .byt 0, <-0
+  .byt 2, <-2
+  .byt 3, <-3 ; faster
+  .byt 2, <-2 ; energy thing
   .byt 0,  0 ; energy thing (vertical)
-  .byt 5, -5 ; FAST energy thing
-  .byt 3, -3 ; fast spiky thing
-  .byt 2, -2 ; energy thing
-  .byt 2, -2 ; player's weapon
-  .byt 4, -4 ; diagonal
-  .byt 5, -5 ; spike
-  .byt 3, -3 ; block
-  .byt 3, -3 ; bomb
+  .byt 5, <-5 ; FAST energy thing
+  .byt 3, <-3 ; fast spiky thing
+  .byt 2, <-2 ; energy thing
+  .byt 2, <-2 ; player's weapon
+  .byt 4, <-4 ; diagonal
+  .byt 5, <-5 ; spike
+  .byt 3, <-3 ; block
+  .byt 3, <-3 ; bomb
 .endproc
 GUN_DIAGONAL = 9
 GUN_VERTICAL = 4
@@ -250,7 +268,7 @@ GUN_VERTICAL = 4
     lda #12
     sta ObjectTimer,x
     ; give a boost
-    lda #-3
+    lda #<-3
     sta PlayerVYH,y
     lda #0
     sta PlayerVYL,y
@@ -469,7 +487,7 @@ ShotHit:
   lda LevelBuf,y
   cmp #METATILE_LAUNCH
   bne :+
-    lda #-2
+    lda #<-2
     sta ObjectVYH,x
     lda #0
     sta ObjectVYL,x
@@ -486,7 +504,7 @@ ShotHit:
 NoBump:
   rts
 OffsetAmount:
-  .byt 4, -6
+  .byt 4, <-6
 .endproc
 
 .proc EnemyGravity
@@ -1180,7 +1198,7 @@ ObjLoop:
       jsr start_sound
       lda #SOUND_EXPLODE2
       jsr start_sound
-      lda #-2
+      lda #<-2
       sta ObjectVYH,x
       ldy TempVal
       jmp :+
@@ -1340,7 +1358,7 @@ Remove:
   sta ObjectF1,x
   rts
 Dirs:
-  .byt 4, -4
+  .byt 4, <-4
 .endproc
 
 .proc PoofObject
@@ -1485,7 +1503,7 @@ Exit:
 
       lda ObjectF1,x
       pha
-      and #~1
+      and #<~1
       sta ObjectF1,x
       lda #10
       jsr EnemyShoot
@@ -1500,7 +1518,7 @@ DontMove:
   jsr EnemyDecTimer
   lda ObjectF1,x
   pha
-  and #~1
+  and #<~1
   sta ObjectF1,x
   jsr DispEnemy
   pla
@@ -1533,7 +1551,7 @@ Exit:
     and #%1111
     bne DontMove
       lda #6
-      ldy #-1
+      ldy #<-1
       jsr EnemyShootAtPlayer
 DontMove:
 
@@ -1593,7 +1611,7 @@ Exit:
 .proc DropBomb
   txa
   tay
-  lda #-1
+  lda #<-1
   sta BombDroppedIndex ; error code for if the index is invalid due to no free slots
   jsr FindFreeObjectX
   php
@@ -1604,7 +1622,7 @@ Exit:
 
   lda ObjectPYH,y
   sta ObjectPYH,x
-  lda #-1
+  lda #<-1
   sta ObjectVYH,x
   lda #0
   sta ObjectPYL,x
@@ -1641,7 +1659,7 @@ Restore:
     jsr rand_8_safe
     and #7
     bne :+
-    lda #-2
+    lda #<-2
     sta ObjectVYH,x
     lda #80
     sta ObjectVYL,x
@@ -1693,7 +1711,7 @@ Exit:
     jsr rand_8_safe
     and #7
     bne :+
-    lda #-2
+    lda #<-2
     sta ObjectVYH,x
     lda #80
     sta ObjectVYL,x
@@ -1863,7 +1881,7 @@ DoVert:
   rts
 
 Move4Dir:
-  .byt 1,-1
+  .byt 1, <-1
 Offset4Dir:
   .byt 15,0
 .endproc
@@ -1903,7 +1921,7 @@ Yes:
   bne No
   lda PlayerVYH,y
   bmi No
-  lda #-2
+  lda #<-2
   sta PlayerVYH,y
   lda #0
   sta PlayerVYL,y
@@ -2230,7 +2248,7 @@ EnemyFrames:
   cmp #ENEMY_STATE_ACTIVE
   bne :+
     lda ObjectPYH,x
-    cmp #-24
+    cmp #<-24
     bcc :+
       lda #0
       sta ObjectF2,x
@@ -2253,7 +2271,7 @@ EnemyFrames:
       inc ObjectPX,x
     :
     lda ObjectPX,x
-    cmp #-24
+    cmp #<-24
     bcc :+
       dec ObjectPX,x
     :
@@ -2272,7 +2290,7 @@ DontMove:
   lda ObjectPYH,x
   cmp #32
   bcc :+
-    lda #-2
+    lda #<-2
     sta ObjectVYH,x
     lda #0
     sta ObjectVYL,x
@@ -2443,7 +2461,7 @@ DontMove:
   lda BulletMap-1,y
   beq LeftEdge
   lda ObjectF1,x
-  and #~1
+  and #<~1
   sta ObjectF1,x
 LeftEdge:
   pla
@@ -2530,7 +2548,7 @@ LaunchWaterBottle:
   sta ObjectF3,x
   lda ObjectPYH,y
   sta ObjectPYH,x
-  lda #-4
+  lda #<-4
   sta ObjectVYH,x
   lda #0
   sta ObjectPYL,x
@@ -2559,7 +2577,7 @@ LaunchWaterBottle:
     jsr rand_8_safe
     and #1
     bne :+
-    lda #-2
+    lda #<-2
     sta ObjectVYH,x
   :
 
@@ -2601,7 +2619,7 @@ Exit:
   bcc :+
     lda ObjectF2,x
     bne DontMove
-    lda #-5
+    lda #<-5
     sta ObjectVYH,x
     lda #0
     sta ObjectVYL,x
@@ -2615,7 +2633,7 @@ Exit:
     lda #2
     jsr EnemyWalk
     bcc DontMove
-      lda #-4
+      lda #<-4
       sta ObjectVYH,x
       lda #0
       sta ObjectVYL,x
@@ -2635,7 +2653,7 @@ DontMove:
     jsr rand_8_safe
     and #7
     bne :+
-    lda #-2
+    lda #<-2
     sta ObjectVYH,x
     lda #80
     sta ObjectVYL,x
@@ -2769,7 +2787,7 @@ Exit:
   lda ObjectPYH,x
   cmp ObjectF3,x
   bcc :+
-    lda #-1
+    lda #<-1
     sta ObjectVYH,x
   :
 

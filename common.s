@@ -1,3 +1,21 @@
+; Double Action Blaster Guys
+;
+; Copyright (C) 2012-2014 NovaSquirrel
+;
+; This program is free software: you can redistribute it and/or
+; modify it under the terms of the GNU General Public License as
+; published by the Free Software Foundation; either version 3 of the
+; License, or (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful, but
+; WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+; General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;
+
 .zeropage
 r_seed: .res 1
 .code
@@ -233,4 +251,53 @@ no_clr:
  .byt %11011111
  .byt %10111111
  .byt %01111111
+.endproc
+
+.macro neg16 val
+  sec             ;Ensure carry is set
+  lda #0          ;Load constant zero
+  sbc val+0       ;... subtract the least significant byte
+  sta val+0       ;... and store the result
+  lda #0          ;Load constant zero again
+  sbc val+1       ;... subtract the most significant byte
+  sta val+1       ;... and store the result
+.endmacro
+
+; added stuff
+.proc SpeedAngle2Offset ; A = speed, Y = angle -> 0,1(X) 2,3(Y)
+Angle = 4
+Speed = 5
+  sty Angle
+  sta Speed
+
+  lda CosineTable,y
+  php
+  bpl :+
+  eor #255
+  add #1
+: ldy Speed
+  jsr mul8
+  sty 0
+  sta 1
+
+  plp
+  bpl :+
+  neg16 0
+:
+
+  ldy Angle
+  lda SineTable,y
+  php
+  bpl :+
+  eor #255
+  add #1
+: ldy Speed
+  jsr mul8
+  sty 2
+  sta 3
+  plp
+  bpl :+
+  neg16 2
+:
+  rts
 .endproc

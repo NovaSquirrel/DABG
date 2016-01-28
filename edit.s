@@ -1,3 +1,20 @@
+; Double Action Blaster Guys
+;
+; Copyright (C) 2012-2014 NovaSquirrel
+;
+; This program is free software: you can redistribute it and/or
+; modify it under the terms of the GNU General Public License as
+; published by the Free Software Foundation; either version 3 of the
+; License, or (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful, but
+; WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+; General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;
 
 ; To change if you edit the number of metatiles:
 ;   LevelEditTileTable, MapEditTypesRow
@@ -239,7 +256,7 @@ ExitRender:
     and #3
     bne NoRepeat
     lda keylast
-    and #~(KEY_LEFT|KEY_DOWN|KEY_UP|KEY_RIGHT)
+    and #<~(KEY_LEFT|KEY_DOWN|KEY_UP|KEY_RIGHT)
     sta keylast
   NoRepeat:
 
@@ -1163,10 +1180,10 @@ Loop:
   lsr
   and #7
   tax
-  lda #-4
+  lda #<-4
   sta OAM_YPOS+(4*1)
   lda EditorCurT
-  and #~%111
+  and #<(~%111)
   add #EditorOffY*8+17*8
   sta OAM_YPOS+(4*1)
   rts
