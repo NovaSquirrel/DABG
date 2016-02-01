@@ -1,0 +1,76 @@
+--- Level information ---
+Levels have 8 bytes of information each:
+
+ppppppmm
+||||||++- Win condition:
+||||||    0: Kill N number of enemies
+||||||    1: Collect N dollars
+||||||    2: Survive for N seconds
+||||||    3: Green to red
+++++++--- Value for the win condition
+
+ffffdeee
+|||||+++- Max number of enemies at once, 1 to 8
+||||+---- Enemy distribution, 0 = 4 4 4 4, 1 = 5 5 3 3
+++++----- Level effect:
+          0: Nothing
+          1: Scrolling, slow
+          2: Scrolling, medium
+          3: Scrolling, fast
+          4: No cycling through the level
+
+...eeeee - Enemy type 1
+...eeeee - Enemy type 2
+...eeeee - Enemy type 3
+...eeeee - Enemy type 4
+The four enemy types that appear in the level
+
+aaaaaaaa - Map address low
+aaaaaaaa - Map address high
+This can be a pointer to a map, or zero for an automatically generated map
+
+--- Map format ---
+The map is composed of a series of commands, composed of the position byte:
+$yx - Y and X position in the level
+
+And then the type byte, which also contains the length if applicable:
+$00 Level is over, this position is the player spawn position
+$01 Single spikes
+$02 Single spring
+$03 Single enemy climbing marker
+$04 Single solid block
+$05 Single bullet reflector
+$06 Single platform 
+$07 Single money
+$08 Single cycling solid (off)
+$09 Single cycling solid (on)
+$0A Single cycling platform (off)
+$0B Single cycling platform (on)
+$0C Single Teleporter (Left)
+$0D Single Teleporter (Right)
+$0E Single Bomb trap
+$0F Single Insta-kill spikes
+$10 Single horizontal moving platform
+$11 Single vertical moving platform
+$12 Single horizontal moving hazard
+$13 Single vertical moving hazard
+$14 Single exploder
+$15 Single cycle switch
+$2n Horizontal solid block
+$3n Horizontal empty space
+$4n Horizontal cycling solid (off)
+$5n Horizontal cycling solid (on)
+$6n Horizontal regular platform
+$7n Horizontal cycling platform (off)
+$8n Horizontal cycling platform (on)
+$9n Vertical solid block
+$An Vertical empty space
+$Bn Vertical cycling solid (off)
+$Cn Vertical cycling solid (on)
+$D0,HW Rectangle fill, solid block
+$D1,HW Rectangle fill, empty space
+$D2,HW Rectangle fill, cycling solid (off)
+$D3,HW Rectangle fill, cycling solid (on)
+$D4,HW Rectangle fill, platform
+$D5,HW Rectangle fill, cycling platform (off)
+$D6,HW Rectangle fill, cycling platform (on)
