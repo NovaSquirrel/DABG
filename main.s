@@ -47,6 +47,12 @@ ScrollAddHi:
   rts
 .endproc
 .proc MainLoop
+;  lda AttractMode
+;  beq :+
+  lda #69
+  sta r_seed
+  sta retraces
+;:
 forever:
   jsr wait_vblank
   bit PPUSTATUS

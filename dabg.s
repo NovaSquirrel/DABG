@@ -15,6 +15,7 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
+playchoice = 1 ; 
 
 ;.setcpu "6502X"
 .include "ns_nes.s" ; handy macros and defines
@@ -35,6 +36,7 @@
 .include "powerups.s"
 .include "math.s"
 .include "unpb53.s"
+.include "attract.s"
 
 .include "musicseq.h"
 .include "sound.s"
@@ -310,7 +312,7 @@ Draw28:
 
 .proc MainColors
   .byt $16, $29, $03, $28
-  .byt $01, $16, $21, $21
+  .byt $01, $16, $27, $21
 .endproc
 .proc BackgroundColors
   .byt $31, $36, $38, $23

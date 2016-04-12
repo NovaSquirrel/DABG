@@ -1,6 +1,7 @@
 .segment "ZEROPAGE"
 
   MaxNumPlayers = 2
+  AttractMode: .res 1
 
   retraces:	       .res 1
   keydown:	       .res MaxNumPlayers

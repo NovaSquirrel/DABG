@@ -566,7 +566,8 @@ LevelZJ:
   .byt $e0, LVL_HSOLID+3
   .byt $b0, LVL_VSOLID+3
   .byt $d2, LVL_SPRING
-  .byt $e8, LVL_RECTFL+LVL_KILL, $07
+  .byt $d8, LVL_RECTFL+LVL_KILL, $07
+  .byt $e8, LVL_HSOLID+7
   .byt $8d, LVL_RECTFL+LVL_SOLID, $62
   .byt $b2, LVL_PLATFM+5
   .byt $a5, LVL_SPRING

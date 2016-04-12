@@ -53,7 +53,29 @@
 
   lda #BG_ON | OBJ_ON
   sta PPUMASK
+
+.ifndef playchoice
   jsr WaitForKey
+.else
+  lda #0
+  sta 0 ; timer
+: jsr wait_vblank
+  jsr ReadJoy
+  lda keydown+0
+  ora keydown+1
+  and #KEY_START
+  bne @Exit
+  lda retraces
+  and #8
+  beq @NoTimerIncrease
+  inc 0
+  lda 0
+  cmp #200
+  jeq StartAttract
+@NoTimerIncrease:
+  jmp :-
+@Exit:
+.endif
   jsr EnableForPress
   jsr wait_vblank
 .endproc
@@ -76,7 +98,11 @@
 .endproc
 
 TitleName:
+.ifdef playchoice
+.incbin "pc10title.pkb"
+.else
 .incbin "title.pkb"
+.endif
 
 .proc MainMenuAddrs
   .raddr MenuNewGame
@@ -435,6 +461,11 @@ PrintSpaces:
 .endproc
 
 .proc PreLevelScreen
+  lda AttractMode ; skip if on attract mode
+  beq :+
+  rts
+:
+
   jsr wait_vblank
   lda #0
   sta PPUMASK
@@ -591,7 +622,7 @@ Step:
   PositionPrintXY 0, 2,16, "Music is a heavily edited"
   PositionPrintXY 0, 3,17, "version of Morning Mood"
 
-  PositionPrintXY 0, 8,25, "Built  5/27/2015"
+  PositionPrintXY 0, 8,25, "Built  4/12/2016"
   PositionPrintXY 0, 2,21, "Press anything to continue"
 
   lda #0

@@ -65,6 +65,13 @@ ResetPlayerHealthX:
   cmp #52 ;64
   jeq StartMainMenu
 :
+  ; hack to make game reset after beating a level with the demo
+  lda AttractMode
+  beq :+
+  lda LevelNumber
+  cmp #3
+  jeq reset
+:
 
   jsr init_sound
   jsr ClearStatusRows

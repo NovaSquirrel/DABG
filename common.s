@@ -26,7 +26,6 @@ r_seed: .res 1
   lda keydown+1
   sta keylast+1
   lda #1
-  sta keydown+0
   sta keydown+1
   sta JOY1
   lda #0
@@ -40,7 +39,73 @@ r_seed: .res 1
     cmp #1
     rol keydown+1
     bcc :-
+  lda AttractMode
+  bne Attract
   rts
+Attract:
+  lda keydown
+  and #KEY_START
+  jne reset
+  lda #0
+  sta keydown
+
+  ; Dumb little AI
+  ldx #0
+Loop:
+  lda ObjectF1,x
+  beq No
+  lda ObjectPYH,x
+  cmp PlayerPYH
+  bne No
+  lda ObjectF2,x
+  bne No
+  lda retraces
+  and #8
+  asl ; 16
+  asl ; 32
+  asl ; 64
+  sta keydown
+
+  lda PlayerPX
+  cmp ObjectPX,x
+  lda #0
+  adc #0
+  sta PlayerDir
+  rts
+No:
+  inx
+  cpx #ObjectLen
+  bne Loop
+
+  lda PlayerPX
+  lsr
+  lsr
+  lsr
+  lsr
+  sta 0
+  lda PlayerPYH
+  add #16
+  and #$f0
+  ora 0
+  tay
+  lda LevelBuf,y
+  bne :+
+    lda PlayerDir
+    eor #1
+    sta PlayerDir
+  :
+
+  ldx PlayerDir
+  lda Directions,x
+  sta keydown
+
+
+  rts
+
+Directions:
+;  .byt KEY_B|KEY_RIGHT, KEY_B|KEY_LEFT
+  .byt KEY_RIGHT, KEY_LEFT
+
 .endproc
 .proc wait_vblank
   lda retraces

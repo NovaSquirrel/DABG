@@ -270,10 +270,12 @@ JustFinishLevel:
   cpx #14
   bne :-
 
+  lda AttractMode
+  bne :+
   lda #0              ; add in the two empty blocks in the very center
   sta LevelBuf + $E7
   sta LevelBuf + $E8
-  rts
+: rts
 .endproc
 
 .proc MakeClouds

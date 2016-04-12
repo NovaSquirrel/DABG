@@ -775,6 +775,13 @@ ShotHit:
     lda #OAM_XFLIP|OAM_COLOR_0
 : sta 0
 
+  cpx #1 ; Player 2 uses a different color
+  bne :+
+    lda 0
+    ora #OAM_COLOR_2
+    sta 0
+  :
+
   lda PlayerPowerTime,x ; flashy if we have a powerup
   beq :+
     lda 0
