@@ -622,7 +622,7 @@ Step:
   PositionPrintXY 0, 2,16, "Music is a heavily edited"
   PositionPrintXY 0, 3,17, "version of Morning Mood"
 
-  PositionPrintXY 0, 8,25, "Built  4/12/2016"
+  PositionPrintXY 0, 8,25, "Built  4/16/2016"
   PositionPrintXY 0, 2,21, "Press anything to continue"
 
   lda #0

@@ -1180,11 +1180,11 @@ Loop:
   lsr
   and #7
   tax
-  lda #<-4
-  sta OAM_YPOS+(4*1)
+;  lda #<-4
+;  sta OAM_YPOS+(4*1)
   lda EditorCurT
   and #<(~%111)
-  add #EditorOffY*8+17*8
+  add #EditorOffY*8+17*8-1
   sta OAM_YPOS+(4*1)
   rts
 .endproc

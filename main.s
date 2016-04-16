@@ -47,12 +47,28 @@ ScrollAddHi:
   rts
 .endproc
 .proc MainLoop
-;  lda AttractMode
-;  beq :+
+  lda AttractMode
+  beq :+
   lda #69
   sta r_seed
   sta retraces
-;:
+:
+.ifdef playchoice ; only 1 or 2 Bills allowed on PlayChoice
+  ldx #15
+: lda LevelEnemyPool,x
+  cmp #OBJECT_BILL_HEAD
+  beq YesBill
+  dex
+  bpl :-
+  jmp NoBill
+YesBill:
+  lda MaxScreenEnemies
+  cmp #3
+  bcc NoBill
+  lda #2
+  sta MaxScreenEnemies
+NoBill:
+.endif
 forever:
   jsr wait_vblank
   bit PPUSTATUS
@@ -109,26 +125,63 @@ SkipJoinIn:
   lda keydown ; pause routine
   ora keydown+1
   and #KEY_START
-  beq NoPause
-    ; display "paused" text
-;    lda ScrollGameMode
-;    bne :+
-      jsr ClearStatusRows
-;    :
-;    ldx #0
-;  : lda PauseString,x
-;    beq :+
-;    sta StatusRow1+0,x
-;    inx
-;    bne :-
-;  :
+  jeq NoPause
+    jsr ClearStatusRows
 
     lda keylast
     ora keylast+1
     and #KEY_START
-    beq NoPause
+    jeq NoPause
       jsr stop_music
       jsr update_sound
+
+      jsr ClearOAM
+      lda #100
+      sta OAM_YPOS+(4*0)
+      sta OAM_YPOS+(4*1)
+      sta OAM_YPOS+(4*2)
+      sta OAM_YPOS+(4*3)
+      sta OAM_YPOS+(4*4)
+      sta OAM_YPOS+(4*5)
+      lda #108+(8*0)
+      sta OAM_XPOS+(4*0)
+      lda #108+(8*1)
+      sta OAM_XPOS+(4*1)
+      lda #108+(8*2)
+      sta OAM_XPOS+(4*2)
+      lda #108+(8*3)
+      sta OAM_XPOS+(4*3)
+      lda #108+(8*4)
+      sta OAM_XPOS+(4*4)
+      lda #108+(8*5)
+      sta OAM_XPOS+(4*5)
+      lda #0
+      sta OAM_ATTR+(4*0)
+      sta OAM_ATTR+(4*1)
+      sta OAM_ATTR+(4*2)
+      sta OAM_ATTR+(4*3)
+      sta OAM_ATTR+(4*4)
+      sta OAM_ATTR+(4*5)
+      lda #'P'
+      sta OAM_TILE+(4*0)
+      lda #'A'
+      sta OAM_TILE+(4*1)
+      lda #'U'
+      sta OAM_TILE+(4*2)
+      lda #'S'
+      sta OAM_TILE+(4*3)
+      lda #'E'
+      sta OAM_TILE+(4*4)
+      lda #'D'
+      sta OAM_TILE+(4*5)
+
+      jsr wait_vblank
+      lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_0000
+      sta PPUCTRL
+      lda #2
+      sta OAM_DMA
+      
+
       lda #BG_ON|OBJ_ON|1
 ;      eor ScrollGameMode
       sta PPUMASK
@@ -173,6 +226,10 @@ SkipJoinIn:
 ;    : 
       lda #1
       sta music_playing
+      jsr ClearOAM
+      jsr wait_vblank
+      lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000
+      sta PPUCTRL
   NoPause:
   lda #1
   sta EnableNMIDraw
@@ -182,15 +239,6 @@ SkipJoinIn:
  .endif
 
   jsr FlickerEnemies
-
-;  jsr rand_8
-;  and #3
-;  sta 0
-;  lda retraces
-;  and #$ff
-;  tay
-;  lda 0
-;  jsr ChangeBlock
 
   inc Timer60
   lda Timer60
