@@ -21,6 +21,39 @@ r_seed: .res 1
 .code
 
 .proc ReadJoy
+.ifdef fourscore
+  lda keydown
+  sta keylast
+  lda keydown+1
+  sta keylast+1
+  lda keydown+2
+  sta keylast+2
+  lda keydown+3
+  sta keylast+3
+
+  ; Reset controllers
+  ldx #1
+  stx JOY1
+  dex
+  stx JOY1
+
+  jsr ReadJoyOnce
+  lda keydown+2
+  sta keydown+0
+  lda keydown+3
+  sta keydown+1
+  lda #0
+  sta keydown+2
+  sta keydown+3
+  lda FourScorePluggedIn
+  beq :+
+  jsr ReadJoyOnce
+:
+
+  lda AttractMode
+  bne Attract
+  rts
+.else
   lda keydown
   sta keylast
   lda keydown+1
@@ -30,18 +63,20 @@ r_seed: .res 1
   sta JOY1
   lda #0
   sta JOY1
-  : lda JOY1
-    and #$03
-    cmp #1
-    rol keydown+0
-    lda JOY2
-    and #$03
-    cmp #1
-    rol keydown+1
-    bcc :-
+: lda JOY1
+  and #$03
+  cmp #1
+  rol keydown+0
+  lda JOY2
+  and #$03
+  cmp #1
+  rol keydown+1
+  bcc :-
   lda AttractMode
   bne Attract
   rts
+.endif
+
 Attract:
   lda keydown
   and #KEY_START
@@ -107,6 +142,24 @@ Directions:
   .byt KEY_RIGHT, KEY_LEFT
 
 .endproc
+
+.ifdef fourscore
+.proc ReadJoyOnce
+  lda #1
+  sta keydown+3
+: lda JOY1
+  and #$03
+  cmp #1
+  rol keydown+2
+  lda JOY2
+  and #$03
+  cmp #1
+  rol keydown+3
+  bcc :-
+  rts
+.endproc
+.endif
+
 .proc wait_vblank
   lda retraces
   loop:
@@ -197,9 +250,17 @@ Finish:
 : jsr ReadJoy
   lda keydown
   ora keydown+1
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3
+.endif
   beq :-
   lda keylast
   ora keylast+1
+.ifdef fourscore
+  ora keylast+2
+  ora keylast+3
+.endif
   bne :-
   rts
 .endproc

@@ -45,7 +45,12 @@ ResetPlayerHealthX:
   jsr ResetPlayerX
   inx
   jsr ResetPlayerX
-
+.ifdef fourscore
+  inx
+  jsr ResetPlayerX
+  inx
+  jsr ResetPlayerX
+.endif
   lda #6
   sta PlayerHead
   asl
@@ -53,6 +58,15 @@ ResetPlayerHealthX:
   lda #0
   sta PlayerBody
   sta PlayerBody+1
+.ifdef fourscore
+  lda #7
+  sta PlayerBody+2
+  sta PlayerBody+3
+  lda #7
+  sta PlayerHead+2
+  lda #4
+  sta PlayerHead+3
+.endif
 ;  jmp NewLevel
 .endproc
 .proc NewLevel
@@ -83,37 +97,45 @@ ResetPlayerHealthX:
   inx
   bne :-
   sta TileCycleIndex
-  sta PlayerVYH
-  sta PlayerVYH+1
-  sta PlayerVYL
-  sta PlayerVYL+1
+
+  ldx #0
+InitPlayerLoop:
+  lda #0
+  sta PlayerVYH,x
+  sta PlayerVYL,x
+  sta PlayerJumpCancelLock,x
+  sta PlayerPYL,x
+  sta PlayerVYH,x
+  sta PlayerVYL,x
+  sta PlayerInvincible,x
+  sta PlayerTeleportCooldown,x
+  sta PlayerPowerType,x
+  sta PlayerPowerTime,x
+  lda #4
+  ldy GameDifficulty
+  cpy #DIFFICULTY_HARDER
+  bcc NormalHealth
+     lda #3
+NormalHealth:
+  sta PlayerHealth,x
+  inx
+  cpx #MaxNumPlayers
+  bne InitPlayerLoop
+
+  lda #0
   sta BothDeadTimer
   sta IsMappedLevel
   sta ScreenEnemiesCount
-  sta PlayerJumpCancelLock+0
-  sta PlayerJumpCancelLock+1
-  sta PlayerPYL+0
-  sta PlayerVYH+0
-  sta PlayerVYL+0
-  sta PlayerInvincible
-  sta PlayerPYL+1
-  sta PlayerVYH+1
-  sta PlayerVYL+1
-  sta PlayerTeleportCooldown+0
-  sta PlayerTeleportCooldown+1
-  sta PlayerInvincible+1
   sta LevelWon
   sta Timer60
   sta PlayerDir
+.ifdef fourscore
+  sta PlayerDir+2
+.endif
   sta JustPickedFromMenu
   sta ScrollX
   sta ScrollX+1
-  sta PlayerPowerType+0
-  sta PlayerPowerType+1
-  sta PlayerPowerTime+0
-  sta PlayerPowerTime+1
   sta NoLevelCycle
-;  sta ScrollGenerator
 
   tax
 : sta ObjectPYH,x
@@ -152,30 +174,31 @@ ResetPlayerHealthX:
   cpx #64
   bne :-
 
-  lda #4
-  sta PlayerHealth
-  sta PlayerHealth+1
-  lda GameDifficulty
-  cmp #DIFFICULTY_HARDER
-  bcc :+
-    dec PlayerHealth
-    dec PlayerHealth+1
-  :
-
 ;  lda ScrollGameMode
   lda #0
   sta ScrollMode
 
   lda #32
   sta PlayerPX+1
-  add #8
+  lda #32+8
   sta PlayerPX
   lda #240-32
   sta PlayerPYH
   sta PlayerPYH+1
+.ifdef fourscore
+  sta PlayerPYH+2
+  sta PlayerPYH+3
+  lda #32+2
+  sta PlayerPX+2
+  lda #32+6
+  sta PlayerPX+3
+.endif
 
   lda #1
   sta PlayerDir+1
+.ifdef fouscore
+  sta PlayerDir+3
+.endif
 
   lda #0
   sta PPUMASK
@@ -196,6 +219,12 @@ ResetPlayerHealthX:
     sta PlayerPX+1
     add #8
     sta PlayerPX
+.ifdef fourscore
+    sub #4
+    sta PlayerPX+2
+    add #2
+    sta PlayerPX+3
+.endif
     lda LevelEditStartY
     asl
     asl
@@ -203,6 +232,10 @@ ResetPlayerHealthX:
     asl
     sta PlayerPYH
     sta PlayerPYH+1
+.ifdef fourscore
+    sta PlayerPYH+2
+    sta PlayerPYH+3
+.endif
   :
 
   jsr wait_vblank

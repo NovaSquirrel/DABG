@@ -15,7 +15,8 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
-playchoice = 1 ; 
+;playchoice = 1 ; if set, do some changes for Four Score
+fourscore = 1   ; if 1, enable four player mode
 
 ;.setcpu "6502X"
 .include "ns_nes.s" ; handy macros and defines
@@ -117,6 +118,24 @@ VectorAddrs:
   inx
   bne :-
 
+  .ifdef fourscore
+  ldx #1
+  stx JOY1
+  dex
+  stx JOY1
+  jsr ReadJoyOnce
+  jsr ReadJoyOnce
+  jsr ReadJoyOnce
+  lda keydown+2
+  cmp #$10
+  bne NotFourScore
+    lda keydown+3
+    cmp #$20
+    bne NotFourScore
+      inc FourScorePluggedIn
+NotFourScore:
+  .endif
+
   lda #$21
   sta FlashColor
 
@@ -132,9 +151,6 @@ VectorAddrs:
   lda #$76
   sta random2+1
 
-  lda #0
-  sta HasExtraRAM
-
   lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000
   sta PPUCTRL
 
@@ -148,8 +164,6 @@ VectorAddrs:
 ; write graphics
   lda #64 ;8192/128
   sta DecCount
-  lda #16*5
-  sta Ignore
 
   lda #0
   sta PPUADDR
@@ -165,14 +179,8 @@ VectorAddrs:
 DecLoop:
   jsr unpb53_some
   ldx #0
-: lda Ignore
-  beq DontIgnore
-    dec Ignore
-    jmp Ignored
-DontIgnore:
-  lda PB53_outbuf,x
+: lda PB53_outbuf,x
   sta PPUDATA
-Ignored:
   inx
   cpx #128
   bne :-

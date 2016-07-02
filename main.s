@@ -72,6 +72,7 @@ NoBill:
 forever:
   jsr wait_vblank
   bit PPUSTATUS
+
   lda ScrollX+1
   sta PPUSCROLL
   lda #0
@@ -96,6 +97,10 @@ forever:
   inc BothDeadTimer
   lda PlayerEnabled+0
   ora PlayerEnabled+1
+.ifdef fourscore
+  ora PlayerEnabled+2
+  ora PlayerEnabled+3
+.endif
   beq :+
     lda #0
     sta BothDeadTimer
@@ -119,11 +124,15 @@ forever:
   sta PlayerEnabled,x
 SkipJoinIn:
   inx
-  cpx #2
+  cpx #MaxNumPlayers
   bne :-
 
   lda keydown ; pause routine
   ora keydown+1
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3      
+.endif
   and #KEY_START
   jeq NoPause
     jsr ClearStatusRows
@@ -191,6 +200,10 @@ SkipJoinIn:
       ldx TempVal
       lda keydown
       ora keydown+1
+.ifdef fourscore
+      ora keydown+2
+      ora keydown+3      
+.endif
       cmp #KEY_START|KEY_SELECT
       jeq StartMainMenu
       and #KEY_START
@@ -213,6 +226,10 @@ SkipJoinIn:
 :     jsr ReadJoy
       lda keydown
       ora keydown+1
+.ifdef fourscore
+      ora keydown+2
+      ora keydown+3      
+.endif
       and #KEY_START
       bne :-
       ldx #15
@@ -298,27 +315,36 @@ NoCycling:
   lda IsFightMode
   beq :+
     lda PlayerEnabled+0
-    and PlayerEnabled+1
+    add PlayerEnabled+1
+.ifdef fourscore
+    add PlayerEnabled+2
+    add PlayerEnabled+3
+.endif
+    cmp #1
     jeq VersusFightWinScreen
   :
 
-  lda PlayerEnabled+0
-  beq :+
   ldx #0
-  jsr RunPlayer
-: lda PlayerEnabled+1
+PlayerRunLoop:
+  lda PlayerEnabled,x
   beq :+
-  ldx #1
   jsr RunPlayer
-:
+: inx
+  cpx #MaxNumPlayers
+  bne PlayerRunLoop
 
   jsr RunBullets
   jsr RunObjects
+.ifdef fourscore
+  lda FourScorePluggedIn
+  bne UseScrollInfo
+.endif
   lda ScrollMode
   bne :+
   jsr UpdateStatus
 : lda ScrollMode
   beq :+
+UseScrollInfo:
   jsr UpdateScrollInfo
 :
 
@@ -540,6 +566,12 @@ NoShowGoal:
   jsr DoStatusSprites
   ldx #1
   jsr DoStatusSprites
+.ifdef fourscore
+  ldx #2
+  jsr DoStatusSprites
+  ldx #3
+  jsr DoStatusSprites
+.endif
 
 ; level objective stuff
   ldy OamPtr
@@ -641,7 +673,7 @@ DoStatusSprites:
   ldx 0
   sta OAM_TILE+(4*0),y
   lda PlayerLives,x
-  add #$c0
+  add #$d0
   sta OAM_TILE+(4*1),y
  
   tya

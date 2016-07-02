@@ -40,9 +40,17 @@ ReadJoyCombine:
 .proc KeyCombine
   lda keydown+1
   ora keydown
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3
+.endif
   sta keydown
   lda keylast+1
   ora keylast
+.ifdef fourscore
+  ora keylast+2
+  ora keylast+3
+.endif
   sta keylast
   rts
 .endproc

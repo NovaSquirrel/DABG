@@ -40,6 +40,13 @@
   sta 0
   lda #>TitleName
   sta 1
+  lda FourScorePluggedIn
+  beq :+
+  lda #<FourScoreName
+  sta 0
+  lda #>FourScoreName
+  sta 1
+:
   lda #$20
   sta PPUADDR
   lda #$00
@@ -63,6 +70,10 @@
   jsr ReadJoy
   lda keydown+0
   ora keydown+1
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3
+.endif
   and #KEY_START
   bne @Exit
   lda retraces
@@ -103,6 +114,8 @@ TitleName:
 .else
 .incbin "title.pkb"
 .endif
+FourScoreName:
+.incbin "fourscore.pkb"
 
 .proc MainMenuAddrs
   .raddr MenuNewGame
@@ -356,10 +369,18 @@ ChoiceLoop:
 
   lda keydown
   ora keydown+1
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3
+.endif
   and #KEY_UP
   beq :+
     lda keylast
     ora keylast+1
+.ifdef fourscore
+    ora keylast+2
+    ora keylast+3
+.endif
     and #KEY_UP
     bne :+
       dec 0
@@ -371,10 +392,18 @@ ChoiceLoop:
 
   lda keydown
   ora keydown+1
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3
+.endif
   and #KEY_DOWN
   beq :+
     lda keylast
     ora keylast+1
+.ifdef fourscore
+    ora keylast+2
+    ora keylast+3
+.endif
     and #KEY_DOWN
     bne :+
       inc 0
@@ -401,6 +430,10 @@ ChoiceLoop:
 
   lda keydown
   ora keydown+1
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3
+.endif
   and #KEY_A|KEY_START
   beq :+
     lda keylast
@@ -452,9 +485,17 @@ PrintSpaces:
   beq :+
   lda keydown
   ora keydown+1
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3
+.endif
   beq :-
   lda keylast
   ora keylast+1
+.ifdef fourscore
+  ora keylast+2
+  ora keylast+3
+.endif
   bne :-
 : rts
 
@@ -464,6 +505,17 @@ PrintSpaces:
   lda AttractMode ; skip if on attract mode
   beq :+
   rts
+:
+  ; start off with more lives in score mode
+  lda IsScoreMode
+  beq :+
+    lda #9
+    sta PlayerLives+0
+    sta PlayerLives+1
+  .ifdef fourscore
+    sta PlayerLives+2
+    sta PlayerLives+3
+  .endif
 :
 
   jsr wait_vblank
@@ -485,6 +537,27 @@ PrintSpaces:
 :
   PositionPrintXY 0, 10,11, "Lives: "
 
+.ifdef fourscore
+  lda FourScorePluggedIn
+  beq NoFourScore
+  ldx #0
+: lda PlayerEnabled,x
+  beq @NotEnabled
+  lda PlayerLives,x
+  jsr PutDecimal
+  jmp @IsEnabled
+@NotEnabled:
+  lda #'-'
+  sta PPUDATA
+@IsEnabled:
+  lda #' '
+  sta PPUDATA
+  inx
+  cpx #MaxNumPlayers
+  bne :-
+  jmp UsedFourScoreLivesDisplay
+NoFourScore:
+.endif
   lda PlayerEnabled
   beq :+
     lda PlayerLives
@@ -497,6 +570,7 @@ PrintSpaces:
     lda PlayerLives+1
     jsr PutDecimal
   :
+UsedFourScoreLivesDisplay:
 
   PositionXY 0, 7,13
   jsr DispGoal
@@ -512,6 +586,10 @@ PrintSpaces:
 
 : lda keydown
   ora keydown+1
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3
+.endif
   and #KEY_START
   beq :+
   jsr ReadJoy
@@ -547,7 +625,11 @@ Defeat:
   .byt " enemies",0
   rts
 : jsr PutStringImmediate
+.ifdef fourscore
+ .byt "everyone else!",0
+.else
  .byt "the other guy!",0
+.endif
   rts
 Collect:
   jsr PutStringImmediate
@@ -607,7 +689,7 @@ Step:
   jsr wait_vblank
   lda #0
   sta PPUMASK
-  jsr ClearName
+  jsr ClearName  
   PositionPrintXY 0, 8,4,  "Double Action"
   PositionPrintXY 0, 9,5,  "Blaster Guys"
 
@@ -622,7 +704,7 @@ Step:
   PositionPrintXY 0, 2,16, "Music is a heavily edited"
   PositionPrintXY 0, 3,17, "version of Morning Mood"
 
-  PositionPrintXY 0, 8,25, "Built  4/16/2016"
+  PositionPrintXY 0, 8,25, "Built  7/2/2016"
   PositionPrintXY 0, 2,21, "Press anything to continue"
 
   lda #0
@@ -661,7 +743,7 @@ SoarAllPlayers:
   bne SoarAllPlayers
 
   lda 15
-  cmp #2
+  cmp #MaxNumPlayers
   bne SoarLoop
 
   lda LevelEditMode
@@ -930,10 +1012,18 @@ DrawLoop:
   jsr ReadJoy
   lda keydown
   ora keydown+1
+.ifdef fourscore
+  ora keydown+2
+  ora keydown+3
+.endif
   sta keydown
 
   lda keylast
   ora keylast+1
+.ifdef fourscore
+  ora keylast+2
+  ora keylast+3
+.endif
   sta keylast
 
   lda keydown
@@ -1048,6 +1138,12 @@ Mul32PPU1202:
 ; warning: spaghetti ahead
 
 PickPlayers:
+.ifdef fourscore
+  lda FourScorePluggedIn
+  beq :+
+    jmp FourScoreSelectPlayers
+  :
+.endif
   ; set selection according to enables
   lda PlayerEnabled+1
   asl
@@ -1211,6 +1307,10 @@ P2Score = ScoreDigits + NumScoreDigits
   sta PPUMASK
   jsr ClearName
 
+.ifdef fourscore
+  lda FourScorePluggedIn
+  jne JustDisplayScores
+.endif
   lda #'2'
   sta 10
 
@@ -1238,7 +1338,8 @@ PrintWins:
   jsr PutStringImmediate
   .byt " WINS!",0
 
-  ; p1 scorer
+JustDisplayScores:
+  ; p1 score
   PositionPrintXY 0, 5,16,  "Scores: "
   ldx #NumScoreDigits-1
 : lda ScoreDigits,x
@@ -1246,17 +1347,35 @@ PrintWins:
   dex
   bpl :-
 
-  ; break inbetween
-  lda #' '
-  sta PPUDATA
-
   ; p2 score
+  PositionXY 0, 13, 17
   ldx #NumScoreDigits*2-1
 : lda ScoreDigits,x
   sta PPUDATA
   dex
   cpx #NumScoreDigits
   bpl :-
+
+  lda FourScorePluggedIn
+  beq NoFourScoreDontPrintFourScores
+  ; p3 score
+  PositionXY 0, 13, 18
+  ldx #NumScoreDigits*3-1
+: lda ScoreDigits,x
+  sta PPUDATA
+  dex
+  cpx #NumScoreDigits*2
+  bpl :-
+
+  ; p4 score
+  PositionXY 0, 13, 19
+  ldx #NumScoreDigits*4-1
+: lda ScoreDigits,x
+  sta PPUDATA
+  dex
+  cpx #NumScoreDigits*3
+  bpl :-
+NoFourScoreDontPrintFourScores:
 
   lda LevelEditMode
   beq :+
@@ -1302,6 +1421,16 @@ PlayAgainSelection:
   sta PPUMASK
   jsr ClearName
 
+.ifdef fourscore
+  ldy #'1'
+  ldx #0
+: lda PlayerEnabled,x
+  bne :+
+  inx
+  iny
+  bne :-
+: sty 10
+.else
   lda #'2'
   sta 10
 
@@ -1310,6 +1439,7 @@ PlayAgainSelection:
   bne :+
     dec 10
   :
+.endif
 
   PositionPrintXY 0, 8,12,  "PLAYER "
   lda 10
@@ -1335,3 +1465,116 @@ PlayAgainSelection:
   jsr WaitForKey
   jmp StartMainMenu
 .endproc
+
+.ifdef fourscore
+.proc FourScoreSelectPlayers
+  ; This part is so that in game modes that disable players (fight mode), you don't have to join back in
+  lda PlayerEnabledCopy
+  ora PlayerEnabledCopy+1
+  ora PlayerEnabledCopy+2
+  ora PlayerEnabledCopy+3
+  beq DontUsePlayerEnabledCopy
+  ldx #3
+: lda PlayerEnabledCopy,x
+  ora PlayerEnabled,x
+  sta PlayerEnabled,x
+  dex
+  bpl :-
+DontUsePlayerEnabledCopy:
+
+  jsr wait_vblank
+  lda #0
+  sta PPUMASK
+  jsr ClearName
+  PositionPrintXY 0, 7,8,  "Who wants to play?"
+  PositionPrintXY 0, 7,10, "A:Join in, B:Leave"
+  PositionPrintXY 0, 5,12, "Press Start when ready"
+
+: jsr ReadJoy
+  lda keydown
+  ora keydown+1
+  ora keydown+2
+  ora keydown+3
+  bne :-
+
+Loop:
+  jsr wait_vblank
+  PositionPrintXY 0, 10,16,"Players: "
+  jsr DrawListOfPlayers
+  lda #0
+  sta PPUSCROLL
+  sta PPUSCROLL
+  lda #OBJ_ON|BG_ON
+  sta PPUMASK
+
+  jsr ReadJoy
+  ldx #MaxNumPlayers-1
+JoinInLeaveLoop:
+  lda keydown,x
+  and #KEY_A
+  beq :+
+  lda #1
+  sta PlayerEnabled,x
+: lda keydown,x
+  and #KEY_B
+  beq :+
+  lsr PlayerEnabled,x
+: lda PlayerEnabled,x
+  sta PlayerEnabledCopy,x
+  dex
+  bpl JoinInLeaveLoop
+
+  lda keydown
+  ora keydown+1
+  ora keydown+2
+  ora keydown+3
+  and #KEY_START
+  bne PressedStart
+
+  jmp Loop
+PressedStart:
+  jsr wait_vblank
+  lda #0
+  sta PPUMASK
+  jsr ClearName
+  lda #$21
+  sta PPUADDR
+  lda #$02
+  sta PPUADDR
+  jsr DrawListOfPlayers
+  lda #0
+  sta PPUSCROLL
+  sta PPUSCROLL
+
+; How many players?
+  lda PlayerEnabled+0
+  add PlayerEnabled+1
+  add PlayerEnabled+2
+  add PlayerEnabled+3
+  sta 0
+  jeq StartMainMenu
+  cmp #1
+  jeq MenuNewGame::Modes1P
+  jmp MenuNewGame::Modes2P
+;  cmp #2
+;  jcs MenuNewGame::Modes2P
+
+DrawListOfPlayers:
+  ldx #0
+  ldy #'1'
+PlayerLoop:
+  lda PlayerEnabled,x
+  bne ShowEnabled
+  lda #' '
+  sta PPUDATA
+  bne ShowedDisabled
+ShowEnabled:
+  sty PPUDATA
+ShowedDisabled:
+  iny
+  inx
+  cpx #MaxNumPlayers
+  bne PlayerLoop
+  rts
+.endproc
+.endif

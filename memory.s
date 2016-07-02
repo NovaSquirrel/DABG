@@ -1,13 +1,15 @@
 .segment "ZEROPAGE"
-
+.ifdef fourscore
+  MaxNumPlayers = 4
+.else
   MaxNumPlayers = 2
+.endif
   AttractMode: .res 1
 
+  FourScorePluggedIn: .res 1
   retraces:	       .res 1
   keydown:	       .res MaxNumPlayers
   keylast: 	       .res MaxNumPlayers
-
-  HasExtraRAM:     .res 1 ; the compo cart will NOT have extra RAM
 
   random1:         .res 2
   random2:         .res 2
@@ -35,26 +37,13 @@
                              ; is PowerType, but -1 if PowerTime is zero
 
   PlayerDir:        .res MaxNumPlayers ; 0 or 1
-  PlayerHead:       .res MaxNumPlayers ; tile number
-  PlayerBody:       .res MaxNumPlayers ; not a tile number
-  PlayerHeld:       .res MaxNumPlayers ; tile number?
-  PlayerPowerType:  .res MaxNumPlayers ;
-  PlayerPowerTime:  .res MaxNumPlayers ; measured in 1/4 frames
-  PlayerJumpCancelLock: .res MaxNumPlayers
-  .enum
-     APOWERUP_NONE
-     APOWERUP_DIAGSHOOT
-     APOWERUP_BOMBS
-     APOWERUP_JUMP
-     APOWERUP_BILLBLOCK
-  .endenum
 
   PlayerLives:      .res MaxNumPlayers
   PlayerHealth:     .res MaxNumPlayers
   MaxHealthNormal    = 4
   MaxHealthHard      = 3
   MaxNumBlockUpdates = 4
-  MaxNumTileUpdates  = 7
+  MaxNumTileUpdates  = 5
   BlockUpdateA1:   .res MaxNumBlockUpdates
   BlockUpdateA2:   .res MaxNumBlockUpdates
   BlockUpdateB1:   .res MaxNumBlockUpdates
@@ -97,26 +86,36 @@
   TouchWidthB:     .res 1
   TouchHeightA:    .res 1
   TouchHeightB:    .res 1
-
-;  mul_factor_a:    .res 1
-;  mul_factor_x:    .res 1
-;  mul_product_lo:  .res 1
-;  mul_product_hi:  .res 1
- 
+  TouchTemp:       .res 1
+  TouchTemp2:      .res 1 
   EnemyWidth:      .res 1
 
 DispEnemyBodyType: .res 1
 DispEnemyWeapon: .res 1
 DispEnemyHead: .res 1
 
-  NumScoreDigits = 5
-  ScoreDigits:     .res NumScoreDigits*2
-  .res 1
-
 .segment "BSS"
   .res 14
+
   soundBSS:        .res 64
   NumRowsMade:     .res 1
+  PlayerHead:       .res MaxNumPlayers ; tile number
+  PlayerBody:       .res MaxNumPlayers ; not a tile number
+  PlayerHeld:       .res MaxNumPlayers ; tile number?
+  PlayerPowerType:  .res MaxNumPlayers ;
+  .enum
+     APOWERUP_NONE
+     APOWERUP_DIAGSHOOT
+     APOWERUP_BOMBS
+     APOWERUP_JUMP
+     APOWERUP_BILLBLOCK
+  .endenum
+  PlayerPowerTime:  .res MaxNumPlayers ; measured in 1/4 frames
+  PlayerJumpCancelLock: .res MaxNumPlayers
+
+  NumScoreDigits = 5
+  ScoreDigits:     .res NumScoreDigits*MaxNumPlayers
+  .res 1
 
   EditorBouncyFX:  .res 1 ; a timer
 
@@ -152,11 +151,6 @@ DispEnemyHead: .res 1
   VersusMode: .res 1
   VersusNeed2Win: .res 1
   VersusWins: .res MaxNumPlayers
-  .enum
-    VERSUS_NONE
-    VERSUS_SCORE
-    VERSUS_FIGHT
-  .endenum
 
   BulletLen   = 12
   ObjectLen   = 14
@@ -216,6 +210,8 @@ DispEnemyHead: .res 1
   EditorCurX:      .res 1
   EditorCurY:      .res 1
   EditorCurT:      .res 1
+
+  PlayerEnabledCopy: .res MaxNumPlayers
 
   LevelBuf = $700
   BulletMap = LevelBuf - 64

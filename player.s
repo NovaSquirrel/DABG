@@ -35,11 +35,10 @@
   sta PlayerDead,x
   jsr PlayerResetPos
   lda #60
-  sta PlayerInvincible
+  sta PlayerInvincible,x
   jsr ResetPlayerHealthX
 :
-  jsr DispPlayer
-  rts
+  jmp DispPlayer
 NotDead:
 
   lda #255
@@ -630,8 +629,7 @@ NotScrollMode:
     txa
     tay
     jsr PlayerHurt
-: jsr DispPlayer
-  rts
+: jmp DispPlayer
 BlockXSpeed:
   .byt 3, <-3
 BlockXOffset:
@@ -691,6 +689,7 @@ ShootBillBlock:
   .byt $15, $15, $15, $15 ; solid guy
   .byt $16, $17, $16, $17 ; tilty pogo guy
   .byt $1e, $1e, $1e, $1e ; hover guy 2
+  .byt $5d, $5e, $5d, $5f ; player style 2
 .endproc
 
 .proc PlayerGetShot
@@ -775,8 +774,14 @@ ShotHit:
     lda #OAM_XFLIP|OAM_COLOR_0
 : sta 0
 
+.ifdef fourscore
+  txa    ; Player 2 and 4 use different colors
+  lsr
+  bcc :+
+.else
   cpx #1 ; Player 2 uses a different color
   bne :+
+.endif
     lda 0
     ora #OAM_COLOR_2
     sta 0
@@ -872,40 +877,38 @@ ShotHit:
 .endproc
 
 .proc ChkTouchGeneric
-  jsr :+
-  swapa TouchLeftA,   TouchLeftB
-  swapa TouchTopA,    TouchTopB
-  swapa TouchWidthA,  TouchWidthB
-  swapa TouchHeightA, TouchHeightB
-  jsr :+
-  clc ; no collision
+  ; http://atariage.com/forums/topic/71120-6502-killer-hacks/page-3?&#entry1054049
+; X positions
+  lda TouchWidthB
+  sub #1
+  sta TouchTemp
+  add TouchWidthA
+  sta TouchTemp2  ; carry now set
+
+  lda TouchLeftA
+  sbc TouchLeftB ; Note will subtract n-1
+  sbc TouchTemp  ;#SIZE2-1
+  adc TouchTemp2 ;#SIZE1+SIZE2-1 ; Carry set if overlap
+  bcc No
+
+; Y positions
+  lda TouchHeightB
+  sub #1
+  sta TouchTemp
+  add TouchHeightA
+  sta TouchTemp2   ; carry now set
+
+  lda TouchTopA
+  sbc TouchTopB   ; Note will subtract n-1
+  sbc TouchTemp  ;#SIZE2-1
+  adc TouchTemp2 ;#SIZE1+SIZE2-1 ; Carry set if overlap
+  bcc No
+
+  sec
   rts
-: lda TouchLeftB
-  add TouchWidthB
-  sta TouchRight
-  lda TouchTopB
-  add TouchHeightB
-  sta TouchBottom
-
-  lda TouchLeftA
-  cmp TouchLeftB
-  bcc :+
-
-  lda TouchLeftA
-  cmp TouchRight
-  bcs :+
-
-  lda TouchTopA
-  cmp TouchTopB
-  bcc :+
-
-  lda TouchTopA
-  cmp TouchBottom
-  bcs :+
-  pla
-  pla
-  sec ; collision detected
-: rts
+No:
+  clc
+  rts
 .endproc
 
 .proc PlayerHurt ; Y is actually the player here, not X
@@ -986,4 +989,4 @@ AddLife:
 .endproc
 
 PlayerScoreIndex:
-  .byt 0, NumScoreDigits
+  .byt 0, NumScoreDigits, NumScoreDigits*2, NumScoreDigits*3
