@@ -985,7 +985,7 @@ AddLife:
   cmp #9
   beq :+
   inc PlayerLives,x
-  rts
+: rts
 .endproc
 
 PlayerScoreIndex:
