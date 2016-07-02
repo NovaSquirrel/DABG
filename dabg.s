@@ -222,7 +222,7 @@ DecLoop:
     sta FlashColor
   :
 
- .repeat 7, I ; change if the max number of tile changes per frame is changed
+ .repeat 5, I ; change if the max number of tile changes per frame is changed
     lda TileUpdateA1+I
     beq :+
       sta PPUADDR
@@ -234,7 +234,7 @@ DecLoop:
       sta TileUpdateA1+I
     :
  .endrep
- .repeat 3, I ; change if the max number of metatile changes per frame is changed
+ .repeat 4, I ; change if the max number of metatile changes per frame is changed
     lda BlockUpdateA1+I
     beq :+
       sta PPUADDR
@@ -259,6 +259,8 @@ DecLoop:
   .endrep
 
   lda ScrollMode
+  jne NoDraw
+  lda FourScorePluggedIn
   jne NoDraw
 .if 0
   beq :+
