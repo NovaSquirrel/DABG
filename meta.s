@@ -551,6 +551,55 @@ MoreObj:
   cpx #64
   bne :-
 
+  ;----------------------------------------------
+  ; Copy from the first nametable to the second one
+  lda ScrollMode
+  beq CopyScreenDone
+  lda #$20
+  sta 1
+  lda #0
+  sta 0
+  CopyBuffer = $100
+  CopyBufferLen = 32
+CopyScreenLoop:
+  lda 1
+  sta PPUADDR
+  lda 0
+  sta PPUADDR
+  bit PPUDATA
+
+  ldx #CopyBufferLen-1
+: lda PPUDATA
+  sta CopyBuffer,x
+  dex
+  bpl :-
+
+  lda 1
+  ora #4
+  sta PPUADDR
+  lda 0
+  sta PPUADDR
+
+  ldx #CopyBufferLen-1
+: lda CopyBuffer,x
+  sta PPUDATA
+  dex
+  bpl :-
+
+  lda 0
+  add #CopyBufferLen
+  sta 0
+  bcc :+
+    inc 1
+    lda 1
+    cmp #$24
+    beq CopyScreenDone
+  :
+  jmp CopyScreenLoop
+CopyScreenDone:
+  ;----------------------------------------------
+
+
   lda #0
   sta PPUSCROLL
   sta PPUSCROLL

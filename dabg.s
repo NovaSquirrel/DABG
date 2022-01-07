@@ -51,7 +51,7 @@ fourscore = 1   ; if 1, enable four player mode
   .byt "NES", $1A
   .byt 2     ; PRG in 16kb units
   .byt 0     ; CHR in 8kb units
-  .byt 0     ; horizontal mirroring
+  .byt 1     ; vertical mirroring
   .byt %1000 ; NES 2.0
   .byt 0     ; extra mapper bits
   .byt 0     ; extra PRG/CHR bits
@@ -229,10 +229,16 @@ DecLoop:
     lda TileUpdateA1+I
     beq :+
       sta PPUADDR
-      lda TileUpdateA2+I
+      ldx TileUpdateA2+I
+      stx PPUADDR
+      ldy TileUpdateT+I
+      sty PPUDATA
+
+      ora #4
       sta PPUADDR
-      lda TileUpdateT+I
-      sta PPUDATA
+      stx PPUADDR
+      sty PPUDATA
+
       lda #0
       sta TileUpdateA1+I
     :
@@ -241,21 +247,34 @@ DecLoop:
     lda BlockUpdateA1+I
     beq :+
       sta PPUADDR
-      lda BlockUpdateA2+I
+      ldx BlockUpdateA2+I
+      stx PPUADDR
+      ldy BlockUpdateT1+I
+      sty PPUDATA
+      ldy BlockUpdateT2+I
+      sty PPUDATA
+      ora #4
       sta PPUADDR
+      stx PPUADDR
       lda BlockUpdateT1+I
       sta PPUDATA
-      lda BlockUpdateT2+I
-      sta PPUDATA
+      sty PPUDATA
 
       lda BlockUpdateB1+I
       sta PPUADDR
-      lda BlockUpdateB2+I
+      ldx BlockUpdateB2+I
+      stx PPUADDR
+      ldy BlockUpdateT3+I
+      sty PPUDATA
+      ldy BlockUpdateT4+I
+      sty PPUDATA
+      ora #4
       sta PPUADDR
+      stx PPUADDR
       lda BlockUpdateT3+I
       sta PPUDATA
-      lda BlockUpdateT4+I
-      sta PPUDATA
+      sty PPUDATA
+
       lda #0
       sta BlockUpdateA1+I
     :
